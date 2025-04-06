@@ -1,0 +1,57 @@
+﻿@using Microsoft.Extensions.Options
+@model WineShop.Models.DTO.ShoppingCartDto
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row m-4">
+        <a asp-controller="ShoppingCart" asp-action="Order" class="btn btn-info">Order Now</a>
+
+    </div>
+    <div class="row m-4">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">ProductPrice</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @for (int i = 0; i < Model.Products.Count; i++)
+                {
+                    var item = Model.Products[i];
+
+
+                    <tr>
+                        <th scope="row">@(i + 1)</th>
+                        <td>@item.Product.ProductName</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Product.Price ден.</td>
+                        <td><a asp-controller="ShoppingCart" asp-action="DeleteFromShoppingCart" asp-route-id="@item.ProductId" class="btn btn-danger">Delete From ShoppingCart</a></td>
+
+                    </tr>
+
+                }
+            </tbody>
+            <tfoot class="thead-dark">
+                <tr>
+                    <th scope="col">TotalPrice:</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col">@Model.TotalPrice ден.</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</div>
+
+
