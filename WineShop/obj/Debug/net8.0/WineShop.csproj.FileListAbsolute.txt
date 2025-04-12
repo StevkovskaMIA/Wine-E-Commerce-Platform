@@ -270,3 +270,4 @@ C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop\bin\Debug\net8.0
 C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Drawing.Common.dll
 C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Windows.Extensions.dll
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop\obj\Debug\net8.0\WineShop.sourcelink.json

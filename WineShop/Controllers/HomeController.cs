@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WineShop.Models;
+using WineShop.Domain;
 
 
 namespace WineShop.Controllers

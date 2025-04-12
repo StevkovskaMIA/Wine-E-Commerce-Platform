@@ -1,92 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using WineShop.Data;
-using WineShop.Models.Domain;
-using WineShop.Models.DTO;
-using WineShop.Models.Identity;
+using WineShop.Domain.DomainModels;
+using WineShop.Domain.DTO;
+using WineShop.Domain.Identity;
+using WineShop.Repository;
+using WineShop.Services.Interface;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WineShop.Controllers
 {
 
     public class ProductsController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<EShopApplicationUser> _userManager;
+        private readonly IProductService _productService;
 
-        public ProductsController(ApplicationDbContext context, UserManager<EShopApplicationUser> userManager)
+
+        public ProductsController(IProductService productService)
         {
-            _context = context;
-            _userManager = userManager;
+            _productService = productService;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var allProducts = this._productService.GetAllProducts();
+            return View(allProducts);
         }
 
         // GET: Products/Details/5/AddProductToCard
-        public async Task<IActionResult> AddProductToCard(Guid? id)
+        public IActionResult AddProductToCard(Guid? id)
         {
-            var product = await _context.Products.Where(z => z.Id.Equals(id)).FirstOrDefaultAsync();
-            AddToShoppingCartDto model = new AddToShoppingCartDto
-            {
-                SelectedProduct = product,
-                ProductId = product.Id,
-                Quantity = 1
-            };
+            var model = this._productService.GetShoppingCartInfo(id); 
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddProductToCard([Bind("ProductId","Quantity")] AddToShoppingCartDto item)
+        public IActionResult AddProductToCard([Bind("ProductId", "Quantity")] AddToShoppingCartDto item)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userShoppingCard = await _context.ShoppingCarts.Where(z => z.OwnerId.Equals(userId)).FirstOrDefaultAsync();
 
-            if(item.ProductId != null && userShoppingCard != null)
+            var result = this._productService.AddToShoppingCart(item, userId);
+
+
+            if (result)
             {
-                var product = await _context.Products.Where(z => z.Id.Equals(item.ProductId)).FirstOrDefaultAsync();
-                if (product != null)
-                {
-                    ProductInShoppingCart itemToAdd = new ProductInShoppingCart
-                    {
-                        Product = product,
-                        ProductId = product.Id,
-                        ShoppingCart = userShoppingCard,
-                        ShoppingCartId = userShoppingCard.Id,
-                        Quantity = item.Quantity,
-                    };
-
-                    _context.Add(itemToAdd);
-                    await _context.SaveChangesAsync();
-                }
                 return RedirectToAction("Index", "Products");
 
             }
-
             return View(item);
         }
 
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        public IActionResult Details(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = this._productService.GetDetailsForProduct(id);
             if (product == null)
             {
                 return NotFound();
@@ -106,27 +82,26 @@ namespace WineShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating")] Product product)
+        public IActionResult Create([Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating")] Product product)
         {
             if (ModelState.IsValid)
             {
-                product.Id = Guid.NewGuid();
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                this._productService.CreateNewProduct(product);
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+
+            return View(product); 
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        public IActionResult Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = this._productService.GetDetailsForProduct(id);
             if (product == null)
             {
                 return NotFound();
@@ -139,7 +114,7 @@ namespace WineShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating")] Product product)
+        public IActionResult Edit(Guid id, [Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating")] Product product)
         {
             if (id != product.Id)
             {
@@ -150,8 +125,7 @@ namespace WineShop.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    this._productService.UpdeteExistingProduct(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -170,15 +144,14 @@ namespace WineShop.Controllers
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        public IActionResult Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = this._productService.GetDetailsForProduct(id);
             if (product == null)
             {
                 return NotFound();
@@ -190,21 +163,15 @@ namespace WineShop.Controllers
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-            }
-
-            await _context.SaveChangesAsync();
+            this._productService.DeleteProduct(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(Guid id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return this._productService.GetDetailsForProduct(id) != null; 
         }
     }
 }

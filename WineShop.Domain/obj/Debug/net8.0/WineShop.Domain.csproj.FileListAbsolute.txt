@@ -1,0 +1,13 @@
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\bin\Debug\net8.0\WineShop.Domain.deps.json
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\bin\Debug\net8.0\WineShop.Domain.dll
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\bin\Debug\net8.0\WineShop.Domain.pdb
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.csproj.AssemblyReference.cache
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.AssemblyInfoInputs.cache
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.AssemblyInfo.cs
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.csproj.CoreCompileInputs.cache
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.sourcelink.json
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.dll
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\refint\WineShop.Domain.dll
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\WineShop.Domain.pdb
+C:\Users\miast\OneDrive\Desktop\213172\GitHub\WineShop\WineShop.Domain\obj\Debug\net8.0\ref\WineShop.Domain.dll

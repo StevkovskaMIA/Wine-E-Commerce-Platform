@@ -2,136 +2,66 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using WineShop.Data;
-using WineShop.Models.Identity;
-using WineShop.Models.DTO;
-using WineShop.Models.Domain;
+
+using WineShop.Repository;
+using WineShop.Repository.Interface;
+using WineShop.Services.Interface;
 
 namespace WineShop.Controllers
 {
     public class ShoppingCartController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<EShopApplicationUser> _userManager;
+        private readonly IShoppingCartService _shoppingCartService;
+        private readonly IUserRepository _userRepository;
 
-
-        public ShoppingCartController(ApplicationDbContext context, UserManager<EShopApplicationUser> userManager)
+        public ShoppingCartController(IShoppingCartService shoppingCartService, IUserRepository userRepository)
         {
-            _context = context;
-            _userManager = userManager;
+            _shoppingCartService = shoppingCartService;
+            _userRepository = userRepository;
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
+
+            //go naogja userot
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var loggedInUser = await _context.Users.
-                Where(z => z.Id == userId)
-                .Include(z => z.UserCart)
-                .Include(z => z.UserCart.ProductInShoppingCarts)
-                .Include("UserCart.ProductInShoppingCarts.Product")
-                .FirstOrDefaultAsync();
-            var userShoppingCart = loggedInUser.UserCart;
+            return View(this._shoppingCartService.getShoppingCartInfo(userId));
 
-            var productPrice = userShoppingCart.ProductInShoppingCarts.Select(z => new
-            {
-                ProductPrice = z.Product.Price,
-                Quantity = z.Quantity
-            }).ToList();
+        }
 
-            var totalPrice = 0;
-            foreach (var item in productPrice)
+        public IActionResult DeleteFromShoppingCart(Guid id)
+        {
+
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = this._shoppingCartService.deleteProductFromShoppingCart(userId, id);
+
+            if (result)
             {
-                totalPrice += item.ProductPrice * item.Quantity;
+                return RedirectToAction("Index", "ShoppingCart");
+            }
+            else
+            {
+                return RedirectToAction("Index", "ShoppingCart");
             }
 
-            // var allProducts = UserShoppingCart.ProductInShoppingCarts.Select(z => z.Product).ToList();
+        }
 
-            ShoppingCartDto shoppingCartDtoItem = new ShoppingCartDto
+        public IActionResult Order()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = this._shoppingCartService.orderNow(userId);
+
+            if (result)
             {
-                Products = userShoppingCart.ProductInShoppingCarts.ToList(),
-                TotalPrice = totalPrice
-            };
-            
-            return View(shoppingCartDtoItem);
+                return RedirectToAction("Index", "ShoppingCart");
+
+            }
+            else
+            {
+                return RedirectToAction("Index", "ShoppingCart");
     
-        }
-
-        public async Task<IActionResult> DeleteFromShoppingCart(Guid id)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var loggedInUser = await _context.Users.
-                Where(z => z.Id == userId)
-                .Include(z => z.UserCart)
-                .Include(z => z.UserCart.ProductInShoppingCarts)
-                .Include("UserCart.ProductInShoppingCarts.Product")
-                .FirstOrDefaultAsync();
-
-            var userShoppingCart = loggedInUser.UserCart;
-            
-            userShoppingCart.ProductInShoppingCarts.
-                Remove(userShoppingCart.ProductInShoppingCarts
-                .Where(z => z.ProductId == id).FirstOrDefault());
-
-            _context.Update(userShoppingCart);
-            await _context.SaveChangesAsync();
-            
-            return RedirectToAction("Index", "ShoppingCart");
-
-        }
-
-        public async Task<IActionResult> Order()
-        {
-            //id na najaven korisnik so negovata kartichka
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var loggedInUser = await _context.Users.
-                Where(z => z.Id == userId)
-                .Include(z => z.UserCart)
-                .Include(z => z.UserCart.ProductInShoppingCarts)
-                .Include("UserCart.ProductInShoppingCarts.Product")
-                .FirstOrDefaultAsync();
-
-            //kartichkata so svoite produkti
-            var userShoppingCart = loggedInUser.UserCart;
-
-            //soodvetnata karticka i kreiram order
-            Order orderItem = new Order
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                User = loggedInUser
-            };
-            
-            //orderot se dodava vo DB
-            _context.Add(orderItem);
-
-
-            //prazna lista so ProductInOrder
-            List<ProductInOrder> productInOrders = new List<ProductInOrder>();
-
-            //tuka ja popolnuvam listata ProductInOrder
-            productInOrders = userShoppingCart.ProductInShoppingCarts
-                .Select(z => new ProductInOrder
-                {
-                    OrderId = orderItem.Id, //eden produkt koj ke e vo OderId onoj sto go kreiravme
-                    ProductId = z.Product.Id, //id na produktot
-                    OrderedProduct = z.Product, //onoj produkt koj so go selektirame example: Stanushina
-                    UserOrder = orderItem
-                }).ToList();
-
-            //gi vnesuvam vo ramkite na DB
-
-            foreach(var item in productInOrders)
-            {
-                _context.Add(item);
-                await _context.SaveChangesAsync();
             }
-
-            //ja cistam kartickata
-            loggedInUser.UserCart.ProductInShoppingCarts.Clear();
-
-            _context.Update(loggedInUser);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", "ShoppingCart");
-        } 
-    }   
+        }
+    }
 }

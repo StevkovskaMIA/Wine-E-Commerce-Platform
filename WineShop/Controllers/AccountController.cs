@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Identity;
-using WineShop.Models.Identity;
-using WineShop.Models.Domain;
+
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using WineShop.Domain.Identity;
+using WineShop.Domain.DomainModels;
 
 namespace YourNamespace.Controllers
 {

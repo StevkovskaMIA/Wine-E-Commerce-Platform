@@ -1,5 +1,4 @@
-﻿@using Microsoft.Extensions.Options
-@model WineShop.Models.DTO.ShoppingCartDto
+﻿@model WineShop.Domain.DTO.ShoppingCartDto
 
 @{
     ViewData["Title"] = "Index";
@@ -23,21 +22,29 @@
                 </tr>
             </thead>
             <tbody>
-
-                @for (int i = 0; i < Model.Products.Count; i++)
+                @if (Model.Products.Count == 0)
                 {
-                    var item = Model.Products[i];
-
-
                     <tr>
-                        <th scope="row">@(i + 1)</th>
-                        <td>@item.Product.ProductName</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Product.Price ден.</td>
-                        <td><a asp-controller="ShoppingCart" asp-action="DeleteFromShoppingCart" asp-route-id="@item.ProductId" class="btn btn-danger">Delete From ShoppingCart</a></td>
-
+                        <td colspan="5">No active Products</td>
                     </tr>
+                }
+                else
+                {
+                    @for (int i = 0; i < Model.Products.Count; i++)
+                    {
+                        var item = Model.Products[i];
 
+
+                        <tr>
+                            <th scope="row">@(i + 1)</th>
+                            <td>@item.Product.ProductName</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.Product.Price ден.</td>
+                            <td><a asp-controller="ShoppingCart" asp-action="DeleteFromShoppingCart" asp-route-id="@item.ProductId" class="btn btn-danger">Delete From ShoppingCart</a></td>
+
+                        </tr>
+
+                    }
                 }
             </tbody>
             <tfoot class="thead-dark">
