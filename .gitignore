@@ -1,1 +1,24 @@
-.vs/ 
+# 👉 Sensitive config files
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# Visual Studio
+.vs/
+
+# Logs
+*.log
+
+# Rider IDE
+.idea/
+
+# Other
+TestResults/

@@ -17,6 +17,7 @@ namespace WineShop.Repository
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<ProductInOrder> ProductInOrders { get; set; }
+        public virtual DbSet<EmailMessage> EmailMessages { get; set; }
 
 
     }

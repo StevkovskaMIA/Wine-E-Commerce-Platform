@@ -18,15 +18,17 @@ namespace WineShop.Services.Implementation
 
         private readonly IRepository<ShoppingCart> _shoppingCartRepositorty;
         private readonly IRepository<Order> _orderRepositorty;
+        private readonly IRepository<EmailMessage> _mailRepository;
         private readonly IRepository<ProductInOrder> _productInOrderRepositorty;
         private readonly IUserRepository _userRepository;
 
-        public ShoppingCartService(IRepository<ShoppingCart> shoppingCartRepository, IRepository<ProductInOrder> productInOrderRepositorty, IRepository<Order> orderRepositorty, IUserRepository userRepository)
+        public ShoppingCartService(IRepository<EmailMessage> mailRepository,IRepository<ShoppingCart> shoppingCartRepository, IRepository<ProductInOrder> productInOrderRepositorty, IRepository<Order> orderRepositorty, IUserRepository userRepository)
         {
             _shoppingCartRepositorty = shoppingCartRepository;
             _userRepository = userRepository;
             _orderRepositorty = orderRepositorty;
             _productInOrderRepositorty = productInOrderRepositorty;
+            _mailRepository = mailRepository;
         }
         public bool deleteProductFromShoppingCart(string userId, Guid id)
         {
@@ -88,10 +90,12 @@ namespace WineShop.Services.Implementation
                 var userShoppingCart = loggedInUser.UserCart;
 
 
-                //EmailMessage mail = new EmailMessage();
-                //mail.MailTo = loggedInUser.Email;
-                //mail.Subject = "Successfully created order";
-                //mail.Status = false;
+
+
+                EmailMessage message = new EmailMessage();
+                message.MailTo = loggedInUser.Email;
+                message.Subject = "Successfully created order";
+                message.status = false;
 
 
                 //soodvetnata karticka i kreiram order
@@ -119,6 +123,19 @@ namespace WineShop.Services.Implementation
                         Quantity = z.Quantity
                     }).ToList();
 
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("Your order is completed. The order contains: ");
+
+                var totalPrice = 0.0;
+                for (int i = 1; i<= result.Count; i++)
+                {
+                    var item = result[i-1];
+                    sb.AppendLine(i.ToString() + " " + item.OrderedProduct.ProductName + " with price of: " + item.OrderedProduct.Price +  " and quantity of: " + item.Quantity);
+                    totalPrice += item.Quantity * item.OrderedProduct.Price;
+                }
+
+                sb.AppendLine("Total Price: " +totalPrice.ToString() +"мкд.");
+                message.Content = sb.ToString();
                 //gi vnesuvam vo ramkite na DB
                 productInOrders.AddRange(result);
 
@@ -129,6 +146,7 @@ namespace WineShop.Services.Implementation
 
                 //ja cistam kartickata
                 loggedInUser.UserCart.ProductInShoppingCarts.Clear();
+                this._mailRepository.Insert(message);
 
                 this._userRepository.Update(loggedInUser);
 

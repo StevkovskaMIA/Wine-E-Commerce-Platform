@@ -47,11 +47,15 @@ namespace WineShop.Services.Implementation
                     };
 
                     this._productInShoppingCartRepository.Insert(itemToAdd);
+                    _logger.LogInformation("Product was successfully added into ShoppingCart!");
+
                     return true;
                 }
                 return false;
 
             }
+            _logger.LogInformation("Something was wrong. ProductId or UseShoppingCard may be unavailable!");
+
             return false;
 
 
