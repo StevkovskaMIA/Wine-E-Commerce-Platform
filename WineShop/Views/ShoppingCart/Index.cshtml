@@ -1,4 +1,7 @@
 ﻿@model WineShop.Domain.DTO.ShoppingCartDto
+@using WineShop.Domain.Payment
+@using Microsoft.Extensions.Options
+@inject IOptions<StripeSettings> Stripe
 
 @{
     ViewData["Title"] = "Index";
@@ -7,22 +10,26 @@
 
 <div class="container">
     <div class="row m-4">
-        <a asp-controller="ShoppingCart" asp-action="Order" class="btn btn-info">Order Now</a>
-
+        @if (Model.TotalPrice > 0)
+        {
+            <button id="checkout-button" class="btn btn-info">
+                Плати @Model.TotalPrice ден.
+            </button>
+        }
     </div>
+
     <div class="row m-4">
         <table class="table">
             <thead class="thead-dark">
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Product Name</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">ProductPrice</th>
-
+                    <th>#</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>ProductPrice</th>
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Products.Count == 0)
+                @if (!Model.Products.Any())
                 {
                     <tr>
                         <td colspan="5">No active Products</td>
@@ -33,32 +40,44 @@
                     @for (int i = 0; i < Model.Products.Count; i++)
                     {
                         var item = Model.Products[i];
-
-
                         <tr>
-                            <th scope="row">@(i + 1)</th>
+                            <td>@(i + 1)</td>
                             <td>@item.Product.ProductName</td>
                             <td>@item.Quantity</td>
                             <td>@item.Product.Price ден.</td>
-                            <td><a asp-controller="ShoppingCart" asp-action="DeleteFromShoppingCart" asp-route-id="@item.ProductId" class="btn btn-danger">Delete From ShoppingCart</a></td>
-
+                            <td>
+                                <a asp-controller="ShoppingCart"
+                                   asp-action="DeleteFromShoppingCart"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-danger">
+                                    Delete From ShoppingCart
+                                </a>
+                            </td>
                         </tr>
-
                     }
                 }
             </tbody>
             <tfoot class="thead-dark">
                 <tr>
-                    <th scope="col">TotalPrice:</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                    <th scope="col">@Model.TotalPrice ден.</th>
+                    <th>TotalPrice:</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>@Model.TotalPrice ден.</th>
                 </tr>
             </tfoot>
         </table>
     </div>
-
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe("@Stripe.Value.PublishableKey");
 
+    document.getElementById("checkout-button")?.addEventListener("click", () => {
+        fetch("/ShoppingCart/PayOrder", { method: "POST" })
+            .then(res => res.json())
+            .then(data => stripe.redirectToCheckout({ sessionId: data.id }))
+            .catch(err => console.error(err));
+    });
+</script>

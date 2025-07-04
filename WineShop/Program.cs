@@ -3,10 +3,11 @@ using NLog;
 using NLog.Web;
 using WineShop.Domain.EMail;
 using WineShop.Domain.Identity;
+using WineShop.Domain.Payment;
 using WineShop.Repository;
 using WineShop.Repository.Implementation;
 using WineShop.Repository.Interface;
-using WineShop.Services;
+
 using WineShop.Services.Implementation;
 using WineShop.Services.Interface;
 
@@ -18,6 +19,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+   // builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 
     builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
@@ -45,6 +47,12 @@ try
     builder.Services.AddScoped<IBackGroundEmailSender, BackGroundEmailSender>();
     //builder.Services.AddHostedService<ConsumeScopedHostedService>();
 
+
+    builder.Services.Configure<StripeSettings>(
+        builder.Configuration.GetSection("Stripe"));
+
+    var stripeSettings = builder.Configuration.GetSection("Stripe").Get<StripeSettings>();
+    Stripe.StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
 
     builder.Services.AddDefaultIdentity<EShopApplicationUser>(options =>

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Stripe;
 using System.Security.Claims;
-
+using WineShop.Domain.Payment;
 using WineShop.Repository;
 using WineShop.Repository.Interface;
 using WineShop.Services.Interface;
@@ -13,11 +15,17 @@ namespace WineShop.Controllers
     {
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IUserRepository _userRepository;
+        private readonly StripeSettings _stripeSettings;
 
-        public ShoppingCartController(IShoppingCartService shoppingCartService, IUserRepository userRepository)
+
+
+        public ShoppingCartController(IShoppingCartService shoppingCartService, IUserRepository userRepository, IOptions<StripeSettings> stripeSettings)
         {
             _shoppingCartService = shoppingCartService;
             _userRepository = userRepository;
+            _stripeSettings = stripeSettings.Value;
+
+
         }
         public IActionResult Index()
         {
@@ -63,5 +71,60 @@ namespace WineShop.Controllers
     
             }
         }
+
+
+        [HttpPost]
+        public IActionResult PayOrder()
+        {
+            Stripe.StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
+
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var cart = _shoppingCartService.getShoppingCartInfo(userId);
+
+            var options = new Stripe.Checkout.SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+        {
+            new Stripe.Checkout.SessionLineItemOptions
+            {
+                PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                {
+                    Currency = "mkd",
+                    UnitAmount = Convert.ToInt32(cart.TotalPrice) * 100, // денари → стотинки
+                    ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "WineShop Order"
+                    }
+                },
+                Quantity = 1
+            }
+        },
+                Mode = "payment",
+                SuccessUrl = Url.Action("SuccessPayment", "ShoppingCart", null, Request.Scheme),
+                CancelUrl = Url.Action("NotSuccessPayment", "ShoppingCart", null, Request.Scheme)
+            };
+
+            var service = new Stripe.Checkout.SessionService();
+            var session = service.Create(options);
+
+            return Json(new { id = session.Id });
+        }
+
+        public IActionResult SuccessPayment()
+        {
+            this.Order(); // ако имаш твоја логика за креирање на нарачка
+            return View();
+        }
+
+        public IActionResult NotSuccessPayment()
+        {
+            return View();
+        }
+
+  
+
+
+
     }
 }
