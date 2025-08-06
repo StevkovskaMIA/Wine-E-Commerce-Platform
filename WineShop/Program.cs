@@ -39,6 +39,7 @@ try
     builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
     builder.Services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
+    builder.Services.AddScoped(typeof(IProductRepository), typeof(ProductRepository));
 
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();

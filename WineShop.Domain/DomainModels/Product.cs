@@ -17,6 +17,8 @@ namespace WineShop.Domain.DomainModels
         public int Price { get; set; }
         [Required]
         public int Rating { get; set; }
+        [Required]
+        public int Quantity { get; set; }
 
 
         public virtual ICollection<ProductInShoppingCart>? ProductInShoppingCarts { get; set; }

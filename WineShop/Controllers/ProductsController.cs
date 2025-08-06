@@ -15,11 +15,14 @@ namespace WineShop.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
 
 
-        public ProductsController(IProductService productService)
+
+        public ProductsController(IProductService productService, IOrderService orderService)
         {
             _productService = productService;
+            _orderService = orderService;
         }
 
         // GET: Products
@@ -114,7 +117,7 @@ namespace WineShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating")] Product product)
+        public IActionResult Edit(Guid id, [Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating,Quantity")] Product product)
         {
             if (id != product.Id)
             {
@@ -158,6 +161,14 @@ namespace WineShop.Controllers
             }
 
             return View(product);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmOrder()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _orderService.PlaceOrder(userId); // ако PlaceOrder е дел од ProductService
+            return RedirectToAction("Index", "Products");
         }
 
         // POST: Products/Delete/5

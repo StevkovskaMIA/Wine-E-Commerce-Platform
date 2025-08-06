@@ -18,7 +18,6 @@
             @:<div class="row">
         }
 
-
         <div class="col-md-3 m-4">
             <div class="card" style="width: 18rem; height: 30rem;">
                 <img class="card-img-top" src="@item.ProductImage" style="height: 50%" alt="Image for product!" />
@@ -28,23 +27,27 @@
                     <p class="card-text">@item.ProductDescription</p>
 
                     <h6>Price: @item.Price ден.</h6>
+                    <p>Останато во залиха: <strong>@item.Quantity</strong> шишиња</p>
                 </div>
 
                 <div class="card-footer">
+                    @if (item.Quantity > 0)
+                    {
+                        <a asp-controller="Products" asp-action="AddProductToCard" asp-route-id="@item.Id" class="btn btn-info">Add to Cart</a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary" disabled>Нема на залиха</button>
+                    }
 
-                    <a asp-controller="Products" asp-action="AddProductToCard" asp-route-id="@item.Id" class="btn btn-info">Add to Card</a>
                     <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary">Edit</a>
-
                 </div>
             </div>
         </div>
 
-
-
-        if (i % 3 == 2)
+        if (i % 3 == 2 || i == Model.Count - 1)
         {
             @:</div>
         }
     }
-
 </div>

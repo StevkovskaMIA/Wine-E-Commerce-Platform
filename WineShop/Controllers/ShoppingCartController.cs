@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stripe;
+using Stripe.Climate;
 using System.Security.Claims;
 using WineShop.Domain.Payment;
 using WineShop.Repository;
@@ -16,14 +17,17 @@ namespace WineShop.Controllers
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IUserRepository _userRepository;
         private readonly StripeSettings _stripeSettings;
+        private readonly IOrderService _orderService;
 
 
 
-        public ShoppingCartController(IShoppingCartService shoppingCartService, IUserRepository userRepository, IOptions<StripeSettings> stripeSettings)
+
+        public ShoppingCartController(IOrderService orderService, IShoppingCartService shoppingCartService, IUserRepository userRepository, IOptions<StripeSettings> stripeSettings)
         {
             _shoppingCartService = shoppingCartService;
             _userRepository = userRepository;
             _stripeSettings = stripeSettings.Value;
+            _orderService = orderService;
 
 
         }
@@ -91,7 +95,7 @@ namespace WineShop.Controllers
                 PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
                 {
                     Currency = "mkd",
-                    UnitAmount = Convert.ToInt32(cart.TotalPrice) * 100, // денари → стотинки
+                    UnitAmount = Convert.ToInt32(cart.TotalPrice) * 100, 
                     ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
                     {
                         Name = "WineShop Order"
@@ -110,12 +114,18 @@ namespace WineShop.Controllers
 
             return Json(new { id = session.Id });
         }
-
+        
         public IActionResult SuccessPayment()
         {
-            this.Order(); // ако имаш твоја логика за креирање на нарачка
+                 
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _orderService.PlaceOrder(userId);
+            this.Order(); 
+
             return View();
         }
+
+        
 
         public IActionResult NotSuccessPayment()
         {
