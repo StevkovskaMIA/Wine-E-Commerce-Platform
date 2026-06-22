@@ -1,0 +1,44 @@
+﻿
+@model List<EShopAdminApplication.Models.Order>
+
+
+
+<div class="container">
+    <div class="row">
+        <a class="btn btn-outline-success" asp-controller"Order" asp-action="ExportAllOrders">Export Orders</a>
+    </div>
+    <div class="row m-4">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Customer Details</th>
+                    <th scope="col">Number of products</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(int i=0; i<Model.Count; i++)
+                {
+                    var item = Model[i];
+
+                        <tr>
+                            <th scope="row">@(i + 1)</th>
+                            <td>@item.User.UserName</td>
+                        <td>@item.ProductInOrders.Sum(x => x.Quantity)</td>
+                        <td><a class="btn btn-outline-secondary" asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">View Order</a></td>
+                        <td><a class="btn btn-outline-secondary" asp-controller="Order" asp-action="CreateInvoice" asp-route-id="@item.Id" class="btn btn-info">Create Invoice</a></td>
+
+                        </tr>
+
+                }
+            </tbody>
+            
+        </table>
+    </div>
+
+</div>
+
+
+
