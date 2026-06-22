@@ -1,0 +1,229 @@
+﻿@*
+  _Layout.cshtml — модерен layout со транспарентен navbar што станува solid при scroll,
+  подобар мобилен (offcanvas) мени, чист main и елегантен footer.
+*@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />  @* важно за мобилен *@
+
+    <title>@ViewData["Title"] - WineShop</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WineShop.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- NAVBAR -->
+    <header>
+        <nav id="mainNav" class="navbar navbar-expand-lg navbar-light fixed-top navbar-glass">
+            <div class="container">
+                <!-- Brand -->
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" asp-append-version="true" alt="WineShop"
+                         class="brand-logo" style="height:38px;width:auto;">
+                    <span class="fw-semibold">Винарија Кувин</span>
+                </a>
+
+                <!-- Toggler (mobile) -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+                        aria-controls="mobileMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Desktop nav -->
+                <div class="collapse navbar-collapse d-none d-lg-flex">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="reserve">Дегустации</a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="TastingReservation" asp-action="MyReservations">
+                                    Мои дегустации
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="wines">Вина</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="visit">За нас</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Products" asp-action="Index">Нашите вина</a>
+                        </li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ShoppingCart" asp-action="Index">Кошничка</a>
+                            </li>
+                        }
+                    </ul>
+                    <div class="ms-3">
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Offcanvas -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-dismiss="offcanvas"
+                           asp-controller="Home" asp-action="Index" asp-fragment="reserve">
+                            Дегустации
+                        </a>
+                    </li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-dismiss="offcanvas"
+                               asp-controller="TastingReservation" asp-action="MyReservations">
+                                Мои дегустации
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-dismiss="offcanvas"
+                           asp-controller="Home" asp-action="Index" asp-fragment="wines">
+                            Вина
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-dismiss="offcanvas"
+                           asp-controller="Home" asp-action="Index" asp-fragment="visit">
+                            За нас
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-dismiss="offcanvas"
+                           asp-controller="Products" asp-action="Index">
+                            Нашите вина
+                        </a>
+                    </li>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-dismiss="offcanvas"
+                               asp-controller="ShoppingCart" asp-action="Index">
+                                Кошничка
+                            </a>
+                        </li>
+                    }
+                </ul>
+                <hr class="my-3">
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main role="main" class="page-wrap">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-top text-muted py-4">
+        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <div>&copy; @DateTime.Now.Year - WineShop</div>
+            <div class="small">
+                <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                   class="text-muted text-decoration-none me-3">Privacy</a>
+                <a asp-controller="Home" asp-action="Index" asp-fragment="reserve"
+                   class="text-muted text-decoration-none">Reserve</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+<style>
+    /* Navbar: glass преку HERO, станува бел со сенка при scroll */
+    .navbar-glass {
+        background: rgba(255,255,255,0.35);
+        backdrop-filter: saturate(180%) blur(8px);
+        transition: background-color .25s ease, box-shadow .25s ease, backdrop-filter .25s ease;
+        padding-top: .25rem;
+        padding-bottom: .25rem;
+        min-height: 60px;
+        z-index: 1055;
+    }
+
+        .navbar-glass.scrolled {
+            background: #fff;
+            backdrop-filter: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,.08);
+        }
+
+    #mainNav .nav-link {
+        padding: .35rem .7rem;
+        font-size: 0.95rem;
+    }
+
+    #mainNav .navbar-brand span {
+        letter-spacing: .2px;
+        font-size: 1.05rem;
+    }
+
+    .page-wrap {
+        padding-top: 72px;
+    }
+
+    .offcanvas .nav-link {
+        padding: .5rem 0;
+    }
+
+    .brand-logo {
+        display: block;
+        height: 28px;
+        width: auto;
+    }
+</style>
+
+<script>
+    // Navbar scroll effect
+    (function () {
+        const nav = document.getElementById('mainNav');
+        if (!nav) return;
+
+        const onScroll = () => {
+            if (window.scrollY > 10) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        };
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+    // Smooth scroll for anchors
+    (function () {
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const id = a.getAttribute('href');
+                if (id && id.length > 1) {
+                    const el = document.querySelector(id);
+                    if (el) {
+                        e.preventDefault();
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+    })();
+</script>

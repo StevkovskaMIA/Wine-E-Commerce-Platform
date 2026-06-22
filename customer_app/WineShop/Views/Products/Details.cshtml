@@ -1,0 +1,163 @@
+﻿@model WineShop.Domain.DomainModels.Product
+
+@{
+    ViewData["Title"] = "Детали за виното";
+    var isAdmin = User.Identity.IsAuthenticated && User.Identity.Name == "mia.stevkovska@yahoo.com";
+}
+
+<section class="wine-hero mb-5">
+    <div class="container text-center text-white">
+        <h1 class="fw-bold mb-2">@Model.ProductName</h1>
+        <p class="mb-0 text-light opacity-75">Вино со уникатен карактер и традиција.</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <img src="@Model.ProductImage"
+                             alt="@Model.ProductName"
+                             class="img-fluid h-100 object-fit-cover">
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body p-4">
+                            <h3 class="fw-bold text-wine mb-3">@Model.ProductName</h3>
+                            <p class="text-muted mb-4">@Model.ProductDescription</p>
+
+                            <div class="mb-3">
+                                <span class="fs-4 fw-bold text-wine">@String.Format("{0:n0}", Model.Price)</span>
+                                <span class="text-muted">ден</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="text-muted">Оценка:</span>
+                                <strong>@Model.Rating ★</strong>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Color))
+                            {
+                                <div class="mb-2">
+                                    <span class="text-muted">Категорија:</span>
+                                    <strong>@Model.Color</strong>
+                                </div>
+                            }
+
+                            @if (Model.Year.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <span class="text-muted">Година:</span>
+                                    <strong>@Model.Year</strong>
+                                </div>
+                            }
+
+                            @if (Model.Quantity > 0)
+                            {
+                                <div class="alert alert-light border-start border-success">
+                                    <strong>@Model.Quantity</strong> парчиња во залиха
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light border-start border-danger">
+                                    <strong>Нема на залиха</strong>
+                                </div>
+                            }
+
+                            <div class="d-flex gap-2 mt-4">
+                                @if (Model.Quantity > 0)
+                                {
+                                    <a asp-controller="Products" asp-action="AddProductToCard" asp-route-id="@Model.Id"
+                                       class="btn btn-wine flex-grow-1 fw-semibold">
+                                        <i class="fa-solid fa-cart-shopping me-2"></i>Додај во кошничка
+                                    </a>
+                                }
+
+                                @if (isAdmin)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                        ✎ Уреди
+                                    </a>
+                                }
+
+                                <a asp-action="Index" class="btn btn-outline-dark">Назад</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Awards Section -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold text-wine mb-3">Награди и признанија</h4>
+
+                    @if (Model.ProductAwards != null && Model.ProductAwards.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var award in Model.ProductAwards)
+                            {
+                                <div class="list-group-item px-0 py-3 border-bottom">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">@award.AwardName</h6>
+                                            <p class="mb-0 text-muted">@award.CompetitionName</p>
+                                        </div>
+
+                                        @if (award.AwardYear.HasValue)
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 mt-2 mt-md-0">
+                                                @award.AwardYear
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Ова вино моментално нема внесени награди.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+<style>
+    .text-wine {
+        color: #7b2d33;
+    }
+
+    .btn-wine {
+        background-color: #7b2d33;
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.7rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-wine:hover {
+            background-color: #8b3a3f;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+    .wine-hero {
+        background: linear-gradient(135deg, #7b2d33 0%, #8b3a3f 50%, #7b2d33 100%);
+        padding: 2.5rem 0;
+        color: #fff;
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 6px 18px rgba(123,45,51,.25);
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>

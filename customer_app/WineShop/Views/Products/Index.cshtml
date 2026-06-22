@@ -1,0 +1,675 @@
+﻿@model List<WineShop.Domain.DomainModels.Product>
+
+@{
+    ViewData["Title"] = "Вина";
+    var isAdmin = User.Identity.IsAuthenticated && User.Identity.Name == "mia.stevkovska@yahoo.com";
+    var isLoggedIn = User.Identity.IsAuthenticated;
+
+    var qSearch = Context.Request.Query["SearchTerm"].ToString();
+    var qColor = Context.Request.Query["Color"].ToString();
+    var qPriceSort = Context.Request.Query["PriceSort"].ToString();
+    var qYearSort = Context.Request.Query["YearSort"].ToString();
+    var qAward = Context.Request.Query["AwardName"].ToString();
+    var qOnlyAvailable = Context.Request.Query["OnlyAvailable"].ToString() == "true";
+
+    var hasExtraFilters = !string.IsNullOrWhiteSpace(qAward) || !string.IsNullOrWhiteSpace(qYearSort);
+}
+
+<section class="wine-hero mb-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="wine-hero__title mb-1">
+                    <i class="fa-solid fa-wine-glass me-2"></i>
+                    Вина
+                </h1>
+                <p class="wine-hero__subtitle m-0">Вкуси ја традицијата на македонското вино.</p>
+            </div>
+
+            @if (isAdmin)
+            {
+                <a class="btn btn-hero" asp-controller="Products" asp-action="Create">
+                    <i class="fa-solid fa-plus me-2"></i>Додај нов производ
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="filter-wrap mb-4">
+        <form asp-controller="Products" asp-action="Index" method="get">
+            <div class="filter-row-main">
+                <div class="filter-search">
+                    <label class="filter-label">Пребарај</label>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text"
+                               name="SearchTerm"
+                               class="search-input"
+                               placeholder="Пр. Станушина, Мерло..."
+                               value="@qSearch" />
+                    </div>
+                </div>
+
+                <div class="filter-box">
+                    <label class="filter-label">Категорија</label>
+                    <select name="Color" class="filter-select">
+                        <option value="">Сите</option>
+                        <option value="Red" selected="@(qColor == "Red")">Црвено</option>
+                        <option value="White" selected="@(qColor == "White")">Бело</option>
+                        <option value="Rose" selected="@(qColor == "Rose")">Розе</option>
+                        <option value="Sparkling" selected="@(qColor == "Sparkling")">Пенливо</option>
+                    </select>
+                </div>
+
+                <div class="filter-box">
+                    <label class="filter-label">Цена</label>
+                    <select name="PriceSort" class="filter-select">
+                        <option value="">Сите</option>
+                        <option value="priceAsc" selected="@(qPriceSort == "priceAsc")">Најниска-највисока</option>
+                        <option value="priceDesc" selected="@(qPriceSort == "priceDesc")">Највисока-најниска</option>
+                    </select>
+                </div>
+
+                <div class="filter-box filter-check-box">
+                    <label class="filter-label">Достапност</label>
+                    <label class="availability-chip">
+                        <input type="checkbox"
+                               name="OnlyAvailable"
+                               value="true"
+                               @(qOnlyAvailable ? "checked" : null) />
+                        <span>Достапни вина</span>
+                    </label>
+                </div>
+
+                <div class="filter-actions">
+                    <label class="filter-label opacity-0">Акции</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button"
+                                class="btn btn-filter-more"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#moreFilters"
+                                aria-expanded="@(hasExtraFilters ? "true" : "false")"
+                                aria-controls="moreFilters">
+                            <i class="fa-solid fa-sliders me-2"></i>Прикажи ги сите филтри
+                        </button>
+
+                        <button type="submit" class="btn btn-filter-apply">Примени</button>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-filter-reset">Ресетирај</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse @(hasExtraFilters ? "show" : "") mt-3" id="moreFilters">
+                <div class="filter-extra-box">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="filter-label">Награди</label>
+                            <select name="AwardName" class="filter-select">
+                                <option value="">Сите</option>
+                                <option value="Gold" selected="@(qAward == "Gold")">Златно</option>
+                                <option value="Silver" selected="@(qAward == "Silver")">Сребрено</option>
+                                <option value="Bronze" selected="@(qAward == "Bronze")">Бронза</option>
+                                <option value="Best of Show" selected="@(qAward == "Best of Show")">Best of Show</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="filter-label">Година</label>
+                            <select name="YearSort" class="filter-select">
+                                <option value="">Сите</option>
+                                <option value="yearDesc" selected="@(qYearSort == "yearDesc")">Најмладо-најстаро</option>
+                                <option value="yearAsc" selected="@(qYearSort == "yearAsc")">Најстаро-најмладо</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(qSearch) || !string.IsNullOrWhiteSpace(qColor) || !string.IsNullOrWhiteSpace(qAward) || !string.IsNullOrWhiteSpace(qPriceSort) || !string.IsNullOrWhiteSpace(qYearSort) || qOnlyAvailable)
+            {
+                <div class="active-filters mt-3">
+                    @if (!string.IsNullOrWhiteSpace(qSearch))
+                    {
+                        <span class="filter-badge">Пребарај: @qSearch</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(qColor))
+                    {
+                        <span class="filter-badge">Категорија: @qColor</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(qPriceSort))
+                    {
+                        <span class="filter-badge">Цена: @qPriceSort</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(qAward))
+                    {
+                        <span class="filter-badge">Награда: @qAward</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(qYearSort))
+                    {
+                        <span class="filter-badge">Година: @qYearSort</span>
+                    }
+                    @if (qOnlyAvailable)
+                    {
+                        <span class="filter-badge">Само достапни</span>
+                    }
+                </div>
+            }
+        </form>
+    </div>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 product-card position-relative d-flex flex-column">
+                        <div class="product-image-wrap p-3">
+                            @if (item.Price > 2000)
+                            {
+                                <span class="badge-premium">★ Premium</span>
+                            }
+                            <img src="@item.ProductImage"
+                                 alt="@item.ProductName"
+                                 class="product-image rounded-3" />
+                        </div>
+
+                        <div class="card-body pt-0 d-flex flex-column flex-grow-1">
+                            <h5 class="card-title fw-semibold mb-1">@item.ProductName</h5>
+
+                            <p class="card-text text-muted mb-3 line-clamp-2">
+                                @item.ProductDescription
+                            </p>
+
+                            <div class="product-meta mb-3">
+                                @if (!string.IsNullOrWhiteSpace(item.Color))
+                                {
+                                    <span class="meta-pill">
+                                        <strong>Категорија:</strong>
+                                        @(item.Color switch
+                                        {
+                                            "Red" => "Црвено",
+                                            "White" => "Бело",
+                                            "Rose" => "Розе",
+                                            "Sparkling" => "Пенливо",
+                                            _ => item.Color
+                                        })
+                        </span>
+                                                }
+
+                                @if (item.Year.HasValue)
+                                {
+                                    <span class="meta-pill"><strong>Година:</strong> @item.Year</span>
+                                }
+                            </div>
+
+                            @if (item.ProductAwards != null && item.ProductAwards.Any())
+                            {
+                                <div class="awards-box mb-3">
+                                    <div class="awards-title">Награди</div>
+                                    <div class="awards-list">
+                                        @foreach (var award in item.ProductAwards.Take(2))
+                                        {
+                                            <span class="award-pill">
+                                                @(award.AwardName switch
+                                                {
+                                                    "Gold" => "Златна",
+                                                    "Silver" => "Сребрена",
+                                                    "Bronze" => "Бронзена",
+                                                    "Best of Show" => "Best of Show",
+                                                    _ => award.AwardName
+                                                })
+                            </span>
+                                                        }
+
+                                        @if (item.ProductAwards.Count > 2)
+                                        {
+                                            <span class="award-pill more-awards">+@(item.ProductAwards.Count - 2) повеќе</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mt-auto">
+                                <div class="price-amount">
+                                    @String.Format("{0:n0}", item.Price) <span class="price-currency">ден</span>
+                                </div>
+
+                                @if (isAdmin)
+                                {
+                                    <div class="text-muted small">
+                                        @(item.Quantity > 0 ? $"{item.Quantity} во залиха" : "Нема на залиха")
+                                    </div>
+                                }
+                            </div>
+
+                            <a class="stretched-link"
+                               asp-controller="Products"
+                               asp-action="Details"
+                               asp-route-id="@item.Id"
+                               aria-label="Отвори детали за @item.ProductName"></a>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
+                            <div class="d-flex gap-2">
+                                @if (item.Quantity > 0)
+                                {
+                                    if (isLoggedIn)
+                                    {
+                                        <a asp-controller="Products" asp-action="AddProductToCard" asp-route-id="@item.Id"
+                                           class="btn btn-add flex-grow-1 fw-semibold">
+                                            <i class="fa-solid fa-cart-shopping me-2"></i>Додај во кошничка
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="btn btn-add flex-grow-1 fw-semibold"
+                                                onclick="alert('За да додадете производ во кошничката, прво најавете се.');">
+                                            <i class="fa-solid fa-cart-shopping me-2"></i>Додај во кошничка
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button class="btn btn-out flex-grow-1 fw-semibold" disabled>
+                                        Нема на залиха
+                                    </button>
+                                }
+
+                                @if (isAdmin)
+                                {
+                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Id"
+                                       class="btn btn-edit" title="Уреди">
+                                        ✎
+                                    </a>
+
+                                    <form asp-controller="Products"
+                                          asp-action="Delete"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Дали сигурно сакаш да го избришеш овој производ?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-delete" title="Избриши">
+                                            🗑
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-light border rounded-4 shadow-sm">
+                    Нема производи што одговараат на избраните филтри.
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+<style>
+    .wine-hero {
+        background: linear-gradient(135deg, #7b2d33 0%, #8b3a3f 50%, #7b2d33 100%);
+        color: #fff;
+        padding: 2.2rem 0;
+        border-radius: 0 0 18px 18px;
+        box-shadow: 0 8px 24px rgba(123,45,51,.25);
+    }
+
+    .wine-hero__title {
+        font-weight: 800;
+    }
+
+    .wine-hero__subtitle {
+        opacity: .95;
+        font-size: 1rem;
+    }
+
+    .btn-hero {
+        background: #fff;
+        color: #7b2d33;
+        border: none;
+        padding: .7rem 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
+
+    .filter-wrap {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-row-main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+    }
+
+    .filter-search {
+        flex: 1 1 320px;
+        min-width: 280px;
+    }
+
+    .filter-box {
+        flex: 0 0 170px;
+    }
+
+    .filter-check-box {
+        flex: 0 0 190px;
+    }
+
+    .filter-actions {
+        flex: 1 1 300px;
+    }
+
+    .filter-label {
+        font-size: .92rem;
+        font-weight: 600;
+        color: #5f6368;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 56px;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        padding: 0 18px 0 48px;
+        font-size: 1.05rem;
+        outline: none;
+        transition: .2s ease;
+    }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: #8b3a3f;
+            box-shadow: 0 0 0 .15rem rgba(123,45,51,.10);
+        }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .filter-select {
+        width: 100%;
+        height: 56px;
+        border-radius: 14px;
+        border: 1px solid #d9dce1;
+        background: #fff;
+        padding: 0 14px;
+        font-size: 1rem;
+        outline: none;
+    }
+
+    .availability-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 56px;
+        padding: 0 16px;
+        border-radius: 14px;
+        border: 1px solid #d9dce1;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+        width: 100%;
+    }
+
+        .availability-chip input {
+            accent-color: #7b2d33;
+        }
+
+    .btn-filter-more,
+    .btn-filter-apply,
+    .btn-filter-reset {
+        height: 56px;
+        border-radius: 14px;
+        padding: 0 18px;
+        font-weight: 600;
+    }
+
+    .btn-filter-more {
+        background: #fff;
+        border: 1px solid #d9dce1;
+        color: #1f2937;
+    }
+
+    .btn-filter-apply {
+        background: #7b2d33;
+        border: none;
+        color: #fff;
+    }
+
+    .btn-filter-reset {
+        background: #fff;
+        border: 1px solid #d9dce1;
+        color: #374151;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .filter-extra-box {
+        padding: 18px;
+        border: 1px solid #ece5e5;
+        border-radius: 18px;
+        background: #faf8f8;
+    }
+
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .filter-badge {
+        background: #f8ecee;
+        color: #7b2d33;
+        border: 1px solid #ead6d9;
+        padding: .45rem .85rem;
+        border-radius: 999px;
+        font-size: .88rem;
+        font-weight: 600;
+    }
+
+    .product-card {
+        transition: transform .18s ease, box-shadow .18s ease;
+        border-radius: 18px;
+    }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(0,0,0,.12);
+        }
+
+        .product-card .card-footer {
+            position: relative;
+            z-index: 2;
+        }
+
+    .product-image-wrap {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        background: #fff;
+        overflow: hidden;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .badge-premium {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: #8b3a3f;
+        color: #fff;
+        font-weight: 700;
+        font-size: .75rem;
+        padding: .35rem .6rem;
+        border-radius: 999px;
+        box-shadow: 0 4px 12px rgba(139,58,63,.35);
+    }
+
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+        min-height: calc(1.4em * 2);
+    }
+
+    .product-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .meta-pill {
+        font-size: .84rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        background: #f7f7f8;
+        border: 1px solid #ececec;
+        color: #4b5563;
+    }
+
+    .awards-box {
+        background: #fcf7f2;
+        border: 1px solid #f0dfcc;
+        border-radius: 14px;
+        padding: 10px 12px;
+    }
+
+    .awards-title {
+        font-size: .82rem;
+        font-weight: 700;
+        color: #8b5e34;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .awards-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .award-pill {
+        font-size: .82rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid #ead7c0;
+        color: #6b4b2c;
+    }
+
+    .more-awards {
+        background: #f6efe7;
+    }
+
+    .price-amount {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #7b2d33;
+    }
+
+    .price-currency {
+        font-size: .95rem;
+        font-weight: 700;
+    }
+
+    .btn-add {
+        background: #7b2d33;
+        color: #fff;
+        border: none;
+        padding: .7rem 1rem;
+        border-radius: 12px;
+    }
+
+    .btn-out {
+        background: #f4f4f4;
+        color: #9aa0a6;
+        border: 1px solid #eee;
+        padding: .7rem 1rem;
+        border-radius: 12px;
+    }
+
+    .btn-edit {
+        background: #fff;
+        border: 1px solid #e1e4e8;
+        color: #6b7280;
+        padding: .7rem .9rem;
+        border-radius: 12px;
+    }
+
+    .btn-delete {
+        background: #fff;
+        border: 1px solid #f1c0c0;
+        color: #b42318;
+        padding: .7rem .9rem;
+        border-radius: 12px;
+    }
+
+        .btn-delete:hover {
+            background: #fff5f5;
+            border-color: #e9a3a3;
+        }
+
+    @@media (max-width: 1199.98px) {
+        .filter-search,
+        .filter-box,
+        .filter-check-box,
+        .filter-actions {
+            flex: 1 1 calc(50% - 14px);
+            min-width: 0;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .filter-search,
+        .filter-box,
+        .filter-check-box,
+        .filter-actions {
+            flex: 1 1 100%;
+        }
+
+        .btn-filter-more,
+        .btn-filter-apply,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>

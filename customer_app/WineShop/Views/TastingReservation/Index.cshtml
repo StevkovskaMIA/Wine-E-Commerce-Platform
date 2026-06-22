@@ -1,0 +1,50 @@
+﻿@model List<WineShop.Domain.DomainModels.TastingPackage>
+
+@{
+    ViewData["Title"] = "Wine Tastings";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-3">Wine Tasting Experiences</h2>
+    <p class="text-muted mb-4">
+        Choose one of our wine tasting experiences and reserve your visit.
+    </p>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100 border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3">@item.Name</h4>
+                        <p>@item.Description</p>
+
+                        <p><strong>Duration:</strong> @item.DurationHours hours</p>
+                        <p><strong>Max guests:</strong> @item.MaxGuests</p>
+                        <p><strong>Price:</strong> @item.Price MKD</p>
+
+                        @if (item.BlocksWholeDay)
+                        {
+                            <p class="text-danger fw-semibold">
+                                Premium package reserves the whole day exclusively for your group.
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-muted">
+                                Classic tasting requires at least 3 hours between reservations.
+                            </p>
+                        }
+
+                        <a asp-controller="TastingReservation"
+                           asp-action="Book"
+                           asp-route-packageId="@item.Id"
+                           class="btn btn-dark rounded-pill px-4 mt-2">
+                            Reserve Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

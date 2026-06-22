@@ -1,0 +1,138 @@
+﻿@model WineShop.Domain.DTO.TastingReservationCreateViewModel
+
+@{
+    ViewData["Title"] = "Reserve Tasting";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="mb-3">@Model.PackageName</h2>
+                    <p class="text-muted">@Model.PackageDescription</p>
+
+                    <div class="mb-4">
+                        <p class="mb-1"><strong>Duration:</strong> @Model.DurationHours hours</p>
+                        <p class="mb-1"><strong>Max guests:</strong> @Model.MaxGuests</p>
+                        <p class="mb-0"><strong>Price:</strong> @Model.Price MKD</p>
+                    </div>
+
+                    @if (Model.BlocksWholeDay)
+                    {
+                        <div class="alert alert-warning">
+                            This package reserves the whole day. Only date selection is needed.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Classic tasting is reserved based on available time slots.
+                        </div>
+                    }
+
+                    <form asp-action="Book" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="PackageId" />
+                        <input type="hidden" asp-for="PackageName" />
+                        <input type="hidden" asp-for="PackageDescription" />
+                        <input type="hidden" asp-for="DurationHours" />
+                        <input type="hidden" asp-for="MaxGuests" />
+                        <input type="hidden" asp-for="Price" />
+                        <input type="hidden" asp-for="BlocksWholeDay" />
+
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Date" class="form-label">Date</label>
+                            <input asp-for="Date" class="form-control" type="date" id="reservationDate" />
+                            <span asp-validation-for="Date" class="text-danger"></span>
+                        </div>
+
+                        @if (!Model.BlocksWholeDay)
+                        {
+                            <div class="mb-3">
+                                <label asp-for="SelectedTime" class="form-label">Time</label>
+                                <select asp-for="SelectedTime" class="form-select" id="timeSelect">
+                                    <option value="">-- Select time --</option>
+                                    @foreach (var time in Model.AvailableTimes)
+                                    {
+                                        <option value="@time">@time</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="SelectedTime" class="text-danger"></span>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="NumberOfGuests" class="form-label">Number of Guests</label>
+                            <input asp-for="NumberOfGuests" class="form-control" type="number" min="1" max="@Model.MaxGuests" />
+                            <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">Full Name</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">
+                            Reserve Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.BlocksWholeDay)
+{
+    <script>
+        document.getElementById("reservationDate").addEventListener("change", async function () {
+            const selectedDate = this.value;
+            const packageId = "@Model.PackageId";
+            const timeSelect = document.getElementById("timeSelect");
+
+            if (!selectedDate) return;
+
+            const response = await fetch(`/TastingReservation/GetAvailableSlots?packageId=${packageId}&date=${selectedDate}`);
+            const data = await response.json();
+
+            timeSelect.innerHTML = "";
+
+            if (data.length === 0) {
+                const option = document.createElement("option");
+                option.value = "";
+                option.text = "No available slots";
+                timeSelect.appendChild(option);
+                return;
+            }
+
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.text = "-- Select time --";
+            timeSelect.appendChild(defaultOption);
+
+            data.forEach(time => {
+                const option = document.createElement("option");
+                option.value = time;
+                option.text = time;
+                timeSelect.appendChild(option);
+            });
+        });
+    </script>
+}

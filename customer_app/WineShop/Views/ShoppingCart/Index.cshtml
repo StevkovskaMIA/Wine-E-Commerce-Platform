@@ -1,0 +1,200 @@
+﻿@model WineShop.Domain.DTO.ShoppingCartDto
+@using WineShop.Domain.Payment
+@using Microsoft.Extensions.Options
+@inject IOptions<StripeSettings> Stripe
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4 cart-page">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="h3 fw-bold m-0">Кошничка</h1>
+        <a asp-controller="Products" asp-action="Index" class="btn btn-light">
+            ← Продолжи со купување
+        </a>
+    </div>
+
+    @if (!Model.Products.Any())
+    {
+        <!-- Empty state -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-5 text-center">
+                <div class="display-6 mb-3">🧺</div>
+                <h2 class="h4 fw-bold">Кошничката е празна</h2>
+                <p class="text-muted mb-4">Додај производи за да продолжиш кон плаќање.</p>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                    Разгледај производи
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Листа на артикли -->
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle cart-table m-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="ps-4">Производ</th>
+                                        <th scope="col">Цена</th>
+                                        <th scope="col" style="width:140px;">Количина</th>
+                                        <th scope="col" class="text-end pe-4">Меѓузбир</th>
+                                        <th scope="col" class="text-end pe-4">Акција</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Products.Count; i++)
+                                    {
+                                        var item = Model.Products[i];
+                                        var price = item.Product.Price;
+                                        var qty = item.Quantity;
+                                        var subtotal = price * qty;
+
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <img src="@item.Product.ProductImage"
+                                                         alt="@item.Product.ProductName"
+                                                         class="cart-thumb rounded" />
+                                                    <div>
+                                                        <div class="fw-semibold">@item.Product.ProductName</div>
+                                                        <div class="text-muted small line-clamp-1">
+                                                            @item.Product.ProductDescription
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">@String.Format("{0:n0}", price) <span class="text-muted">ден</span></div>
+                                            </td>
+                                            <td>
+                                                <!-- Ако имаш UpdateQuantity action, може да ставиме мини-форма; за сега само приказ -->
+                                                <div class="input-group input-group-sm qty-group">
+                                                    <input class="form-control text-center" value="@qty" readonly />
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="fw-bold">@String.Format("{0:n0}", subtotal) <span class="text-muted">ден</span></div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <a asp-controller="ShoppingCart"
+                                                   asp-action="DeleteFromShoppingCart"
+                                                   asp-route-id="@item.ProductId"
+                                                   class="btn btn-sm btn-outline-danger">
+                                                    <i class="fa-solid fa-trash-can me-1"></i>Избриши
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Вкупно</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th class="text-end pe-4">
+                                            <div class="h5 m-0 fw-bold">
+                                                @String.Format("{0:n0}", Model.TotalPrice) <span class="text-muted">ден</span>
+                                            </div>
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Резиме / Checkout -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 position-sticky summary-card">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3">Резиме на нарачка</h2>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Производи</span>
+                            <span>@Model.Products.Count</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Вкупно</span>
+                            <span class="fw-semibold">@String.Format("{0:n0}", Model.TotalPrice) ден</span>
+                        </div>
+
+                        <hr />
+
+                        <button id="checkout-button" class="btn btn-primary w-100 btn-lg">
+                            <i class="fa-solid fa-credit-card me-2"></i>
+                            Плати @String.Format("{0:n0}", Model.TotalPrice) ден
+                        </button>
+
+                        <div class="text-muted small mt-3">
+                            Со кликање на „Плати“ ќе бидеш пренасочен на Stripe Checkout.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+<style>
+    .cart-page .cart-thumb {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,.05);
+    }
+
+    .cart-table tbody tr + tr td {
+        border-top: 1px solid #f1f3f5;
+    }
+
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .qty-group input {
+        max-width: 80px;
+    }
+
+    .summary-card {
+        top: 16px;
+    }
+</style>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe("@Stripe.Value.PublishableKey");
+
+    document.getElementById("checkout-button")?.addEventListener("click", () => {
+        fetch("/ShoppingCart/PayOrder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "RequestVerificationToken": getCsrfToken() },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(data => stripe.redirectToCheckout({ sessionId: data.id }))
+        .catch(err => console.error(err));
+    });
+
+    // Ако користиш AntiForgery во контролерот, испрати token и од fetch:
+    function getCsrfToken() {
+        const tokenElem = document.querySelector('input[name="__RequestVerificationToken"]');
+        return tokenElem ? tokenElem.value : "";
+    }
+</script>

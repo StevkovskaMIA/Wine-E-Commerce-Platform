@@ -1,0 +1,210 @@
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WineShop.Domain.DomainModels;
+using WineShop.Domain.DTO;
+using WineShop.Domain.Identity;
+using WineShop.Repository;
+using WineShop.Services.Interface;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace WineShop.Domain.DTO
+{
+
+    public class ProductsController : Controller
+    {
+        private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
+
+
+
+        public ProductsController(IProductService productService, IOrderService orderService)
+        {
+            _productService = productService;
+            _orderService = orderService;
+        }
+
+        // GET: Products
+        public IActionResult Index(ProductFilterDto filter)
+        {
+            var allProducts = this._productService.FilterProducts(filter);
+            return View(allProducts);
+        }
+
+        // GET: Products/Details/5/AddProductToCard
+        public IActionResult AddProductToCard(Guid? id)
+        {
+            var model = this._productService.GetShoppingCartInfo(id); 
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddProductToCard([Bind("ProductId", "Quantity")] AddToShoppingCartDto item)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = this._productService.AddToShoppingCart(item, userId);
+
+
+            if (result)
+            {
+                return RedirectToAction("Index", "Products");
+
+            }
+            return View(item);
+        }
+
+
+        // GET: Products/Details/5
+        public IActionResult Details(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = this._productService.GetDetailsForProduct(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+        // GET: Products/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Products/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating,Quantity,Color,Year")] Product product)
+        {
+            if (ModelState.IsValid)
+            {
+                this._productService.CreateNewProduct(product);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(product);
+        }
+
+        // GET: Products/Edit/5
+        public IActionResult Edit(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = this._productService.GetDetailsForProduct(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
+
+        // POST: Products/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Guid id, [Bind("Id,ProductName,ProductImage,ProductDescription,Price,Rating,Quantity,Color,Year")] Product product)
+        {
+            if (id != product.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    this._productService.UpdeteExistingProduct(product);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProductExists(product.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(product);
+        }
+        // GET: Products/Delete/5
+        public IActionResult Delete(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = this._productService.GetDetailsForProduct(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmOrder()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _orderService.PlaceOrder(userId); // ако PlaceOrder е дел од ProductService
+            return RedirectToAction("Index", "Products");
+        }
+
+        // POST: Products/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(Guid id)
+        {
+            this._productService.DeleteProduct(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool ProductExists(Guid id)
+        {
+            return this._productService.GetDetailsForProduct(id) != null; 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddAward(AddProductAwardDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction("Edit", new { id = model.ProductId });
+            }
+
+            _productService.AddAwardToProduct(model);
+            return RedirectToAction("Edit", new { id = model.ProductId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteAward(Guid awardId, Guid productId)
+        {
+            _productService.DeleteAward(awardId);
+            return RedirectToAction("Edit", new { id = productId });
+        }
+    }
+}

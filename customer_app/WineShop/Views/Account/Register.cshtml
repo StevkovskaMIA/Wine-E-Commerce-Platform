@@ -1,0 +1,131 @@
+﻿@model WineShop.Domain.Identity.UserRegistrationDto
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-wrap">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card auth-card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h1 class="h3 fw-bold mb-1">Креирај акаунт</h1>
+                                <div class="text-muted">Добредојде во Вински Келар</div>
+                            </div>
+                            <div class="auth-logo">
+                                <i class="fa-solid fa-wine-bottle"></i>
+                            </div>
+                        </div>
+
+                        @Html.ValidationSummary("", new { @class = "text-danger small mb-3" })
+
+                        <form asp-action="Register" asp-controller="Account" method="post" novalidate>
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                                    @Html.TextBoxFor(m => m.Email, new { placeholder = "name@example.com", @class = "form-control", autocomplete = "email" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label fw-semibold">Лозинка</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                    @Html.PasswordFor(m => m.Password, new { placeholder = "••••••••", @class = "form-control", id = "pwd1", autocomplete = "new-password" })
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePwd1" tabindex="-1">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </button>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                                <div class="form-text">Минимум 6 карактери се препорачуваат.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold">Потврди лозинка</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-shield-check"></i></span>
+                                    @Html.PasswordFor(m => m.ConfirmPassword, new { placeholder = "••••••••", @class = "form-control", id = "pwd2", autocomplete = "new-password" })
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePwd2" tabindex="-1">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </button>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-auth">
+                                    <i class="fa-solid fa-user-plus me-2"></i>Sign Up
+                                </button>
+                                <a asp-action="Login" asp-controller="Account" class="btn btn-light">
+                                    Веќе имаш акаунт? Логирај се
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="text-center text-muted small mt-3">
+                    Со креирање акаунт се согласуваш со условите за користење.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<style>
+    .auth-wrap {
+        padding: 2.5rem 0;
+    }
+
+    .auth-card {
+        background: #ffffff;
+    }
+
+    .auth-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #7b2d33;
+        color: #fff;
+        font-size: 1.25rem;
+        box-shadow: 0 6px 18px rgba(123,45,51,.25);
+    }
+
+    .btn-auth {
+        padding: .8rem 1rem;
+        font-weight: 700;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function toggle(id, btnId) {
+            const i = document.getElementById(id);
+            const b = document.getElementById(btnId);
+            if (!i || !b) return;
+            const icon = b.querySelector('i');
+            b.addEventListener('click', () => {
+                const t = i.getAttribute('type') === 'password' ? 'text' : 'password';
+                i.setAttribute('type', t);
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+        toggle('pwd1','togglePwd1');
+        toggle('pwd2','togglePwd2');
+    </script>
+}

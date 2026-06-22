@@ -1,0 +1,82 @@
+﻿@model WineShop.Domain.DTO.AddToShoppingCartDto
+
+@{
+    ViewData["Title"] = "Add To Shopping Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="h4 fw-bold mb-3 text-center">Додај производ во кошничка</h2>
+                    <hr />
+
+                    <form asp-action="AddProductToCard" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ProductId" />
+
+                        <div class="mb-3 text-center">
+                            <img src="@Model.SelectedProduct.ProductImage"
+                                 alt="@Model.SelectedProduct.ProductName"
+                                 class="img-fluid rounded-3 shadow-sm"
+                                 style="max-height:200px; object-fit:contain;" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Име на производ</label>
+                            <input type="text" class="form-control" value="@Model.SelectedProduct.ProductName" disabled />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Цена</label>
+                            <input type="text" class="form-control" value="@String.Format("{0:n0}", Model.SelectedProduct.Price) ден" disabled />
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Quantity" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" id="decreaseQty">−</button>
+                                <input asp-for="Quantity" class="form-control text-center" type="number" min="1" value="1" />
+                                <button type="button" class="btn btn-outline-secondary" id="increaseQty">+</button>
+                            </div>
+                            <span asp-validation-for="Quantity" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa-solid fa-cart-plus me-2"></i>Додај во кошничка
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-action="Index" asp-controller="Products" class="btn btn-link">← Назад кон производите</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const qtyInput = document.querySelector('input[name="Quantity"]');
+        document.getElementById('decreaseQty')?.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            if (val > 1) qtyInput.value = val - 1;
+        });
+        document.getElementById('increaseQty')?.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            qtyInput.value = val + 1;
+        });
+    </script>
+}
