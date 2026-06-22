@@ -1,0 +1,15 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@{
+    ViewData["Title"] = "Payment Failed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container text-center mt-5">
+    <h2 class="text-danger">❌ Payment Failed</h2>
+    <p>Unfortunately, your payment could not be processed.</p>
+    <a href="@Url.Action("Index", "ShoppingCart")" class="btn btn-warning mt-3">Try Again</a>
+</div>
