@@ -34,7 +34,11 @@ namespace WineShop.Services.Implementation
             return this._orderRepository.GetOrderDetaills(model);
         }
 
-        public void PlaceOrder(string userId)
+        public void PlaceOrder(string userId,
+                       string deliveryType = "pickup",
+                       string? address = null,
+                       string? city = null,
+                       string? phone = null)
         {
             // 1. Најди ја кошничката за корисникот
             var cart = _context.ShoppingCarts
@@ -69,7 +73,11 @@ namespace WineShop.Services.Implementation
             {
                 Id = orderId,
                 UserId = userId,
-                ProductInOrders = productInOrders
+                ProductInOrders = productInOrders,
+                DeliveryType = deliveryType,
+                DeliveryAddress = address,
+                DeliveryCity = city,
+                DeliveryPhone = phone
             };
 
             // 6. Сними нарачката

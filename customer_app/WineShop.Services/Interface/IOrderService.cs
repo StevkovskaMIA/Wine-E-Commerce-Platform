@@ -11,7 +11,10 @@ namespace WineShop.Services.Interface
     {
         List<Order> GetAllOrders();
         Order GetOrderDetails(BaseEntity model);
-        void PlaceOrder(string userId);
-
+        void PlaceOrder(string userId,
+                            string deliveryType,
+                            string? address = null,
+                            string? city = null,
+                            string? phone = null);
     }
 }

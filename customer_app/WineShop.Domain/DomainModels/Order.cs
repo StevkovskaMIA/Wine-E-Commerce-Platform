@@ -12,5 +12,10 @@ namespace WineShop.Domain.DomainModels
 
         public IEnumerable<ProductInOrder> ProductInOrders { get; set; }
 
+        [Required]
+        public string DeliveryType { get; set; }
+        public string? DeliveryAddress { get; set; }
+        public string? DeliveryCity { get; set; }
+        public string? DeliveryPhone { get; set; }
     }
 }

@@ -168,7 +168,7 @@ namespace WineShop.Domain.DTO
         public IActionResult ConfirmOrder()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _orderService.PlaceOrder(userId); // ако PlaceOrder е дел од ProductService
+            _orderService.PlaceOrder(userId, "pickup", null, null, null); // ако PlaceOrder е дел од ProductService
             return RedirectToAction("Index", "Products");
         }
 

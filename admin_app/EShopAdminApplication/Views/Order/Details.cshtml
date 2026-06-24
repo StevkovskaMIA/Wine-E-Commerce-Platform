@@ -1,34 +1,90 @@
 ﻿@model EShopAdminApplication.Models.Order
 
 <style>
+    .page-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .info-card {
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .07);
+        overflow: hidden;
+    }
+
+        .info-card .card-header {
+            background: linear-gradient(135deg, #7b1e2b, #a52a3a);
+            color: white;
+            border: 0;
+            padding: 18px 24px;
+        }
+
+        .info-card .card-body {
+            text-align: left;
+            padding: 24px;
+        }
+
+    .info-item {
+        margin-bottom: 18px;
+    }
+
+    .info-label {
+        font-size: .82rem;
+        color: #6c757d;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .section-title {
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
     .product-card {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
         transition: transform .2s ease, box-shadow .2s ease;
     }
 
         .product-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, .12);
         }
 
     .img-wrap {
-        height: 320px; /* доволно висока за шише */
-        background-color: #f8f9fa; /* светла позадина за празен простор околу сликата */
+        height: 280px;
+        background: #f8f9fa;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-        border-bottom: 1px solid #eaeaea;
+        border-bottom: 1px solid #eee;
     }
 
         .img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* цела слика, без отсекување */
-            padding: 10px;
+            object-fit: contain;
+            padding: 12px;
         }
 
-    .card-body {
+    .product-card .card-body {
         text-align: center;
+        padding: 18px;
     }
 
     .clamp-2 {
@@ -38,17 +94,88 @@
         overflow: hidden;
     }
 
-    .clamp-4 {
+    .clamp-3 {
         display: -webkit-box;
-        -webkit-line-clamp: 4;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    .qty-badge {
+        display: inline-block;
+        background: #f1f3f5;
+        color: #495057;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: .85rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .price-tag {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #a52a3a;
     }
 </style>
 
 <div class="container my-5">
     <div class="text-center mb-4">
-        <h2 class="fw-bold">Order for: @Model.User.UserName</h2>
+        <h2 class="page-title">Детали за нарачка</h2>
+        <p class="page-subtitle">Број на нарачка: @Model.Id</p>
+    </div>
+
+    <div class="card info-card mb-5">
+        <div class="card-header">
+            <h4 class="mb-0">Податоци за клиентот и доставата</h4>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 info-item">
+                    <div class="info-label">Корисник</div>
+                    <div class="info-value">@Model.User.UserName</div>
+                </div>
+
+                <div class="col-md-6 info-item">
+                    <div class="info-label">Начин на достава</div>
+                    <div class="info-value">
+                        @(Model.DeliveryType == "delivery" ? "Достава" : "Лично превземање")
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.DeliveryPhone))
+                {
+                    <div class="col-md-6 info-item">
+                        <div class="info-label">Мобилен телефон</div>
+                        <div class="info-value">@Model.DeliveryPhone</div>
+                    </div>
+                }
+
+                @if (Model.DeliveryType == "delivery")
+                {
+                    @if (!string.IsNullOrWhiteSpace(Model.DeliveryCity))
+                    {
+                        <div class="col-md-6 info-item">
+                            <div class="info-label">Град</div>
+                            <div class="info-value">@Model.DeliveryCity</div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.DeliveryAddress))
+                    {
+                        <div class="col-md-12 info-item">
+                            <div class="info-label">Адреса</div>
+                            <div class="info-value">@Model.DeliveryAddress</div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4 text-center">
+        <h3 class="section-title">Продукти за нарачка</h3>
     </div>
 
     <div class="row g-4">
@@ -56,17 +183,19 @@
         {
             var item = productOrder.OrderedProduct;
 
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
-                <div class="card product-card border-0 rounded-4 shadow-sm w-100 h-100">
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 d-flex">
+                <div class="card product-card w-100 h-100">
                     <div class="img-wrap">
                         <img src="@item.ProductImage" alt="@item.ProductName" loading="lazy" />
                     </div>
 
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold clamp-2">@item.ProductName</h5>
-                        <p class="card-text text-muted small clamp-4">@item.ProductDescription</p>
-                        <div class="mt-auto pt-2">
-                            <span class="fw-bold text-danger">@item.Price ден.</span>
+                        <h5 class="fw-semibold clamp-2 mb-2">@item.ProductName</h5>
+                        <p class="text-muted small clamp-3 mb-3">@item.ProductDescription</p>
+
+                        <div class="mt-auto">
+                            <div class="qty-badge">Количина: @productOrder.Quantity</div>
+                            <div class="price-tag">@item.Price ден.</div>
                         </div>
                     </div>
                 </div>

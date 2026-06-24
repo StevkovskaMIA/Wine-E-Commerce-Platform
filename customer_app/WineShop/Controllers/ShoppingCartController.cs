@@ -9,6 +9,8 @@ using WineShop.Domain.Payment;
 using WineShop.Repository;
 using WineShop.Repository.Interface;
 using WineShop.Services.Interface;
+using WineShop.Domain.DTO;
+
 
 namespace WineShop.Controllers
 {
@@ -90,7 +92,44 @@ namespace WineShop.Controllers
             var result = this._shoppingCartService.orderNow(userId);
 
             return RedirectToAction("Index", "ShoppingCart");
-        }   
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult PlaceOrderWithDelivery([FromBody] OrderRequestDto request)
+        {
+            if (request == null)
+                return Json(new { success = false, message = "Невалиден барање." });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
+            var cart = _shoppingCartService.getShoppingCartInfo(userId);
+            if (cart == null || cart.Products == null || !cart.Products.Any())
+                return Json(new { success = false, message = "Кошничката е празна." });
+
+            if (string.IsNullOrWhiteSpace(request.Phone))
+                return Json(new { success = false, message = "Телефонот е задолжителен." });
+
+            if (request.DeliveryType == "delivery")
+            {
+                if (string.IsNullOrWhiteSpace(request.Address))
+                    return Json(new { success = false, message = "Адресата е задолжителна." });
+
+                if (string.IsNullOrWhiteSpace(request.City))
+                    return Json(new { success = false, message = "Градот е задолжителен за достава." });
+            }
+
+            _orderService.PlaceOrder(
+                userId,
+                request.DeliveryType,
+                request.Address,
+                request.City,
+                request.Phone);
+
+            return Json(new { success = true });
+        }
+
 
         [HttpPost]
         public IActionResult PayOrder()
@@ -133,10 +172,7 @@ namespace WineShop.Controllers
         public IActionResult SuccessPayment()
         {
                  
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _orderService.PlaceOrder(userId);
-
-            return View();
+             return View();
         }
 
         
@@ -145,6 +181,7 @@ namespace WineShop.Controllers
         {
             return View();
         }
+
 
   
 
