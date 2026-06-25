@@ -133,9 +133,27 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 info-item">
+                    <div class="info-label">Број на нарачка</div>
+                    <div class="info-value">@Model.Id</div>
+                </div>
+
+                <div class="col-md-6 info-item">
+                    <div class="info-label">Број на производи</div>
+                    <div class="info-value">@Model.ProductInOrders.Count()</div>
+                </div>
+
+                <div class="col-md-6 info-item">
                     <div class="info-label">Корисник</div>
                     <div class="info-value">@Model.User.UserName</div>
                 </div>
+
+                @if (Model.User != null && !string.IsNullOrWhiteSpace(Model.User.Email))
+                {
+                    <div class="col-md-6 info-item">
+                        <div class="info-label">Е-маил</div>
+                        <div class="info-value">@Model.User.Email</div>
+                    </div>
+                }
 
                 <div class="col-md-6 info-item">
                     <div class="info-label">Начин на достава</div>

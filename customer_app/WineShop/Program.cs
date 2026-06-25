@@ -9,6 +9,7 @@ using WineShop.Repository.Implementation;
 using WineShop.Repository.Interface;
 using WineShop.Service.Implementation;
 using WineShop.Service.Interface;
+using WineShop.Services;
 using WineShop.Services.Implementation;
 using WineShop.Services.Interface;
 
@@ -53,7 +54,8 @@ try
     builder.Services.AddScoped<ITastingReservationService, TastingReservationService>();
     builder.Services.AddScoped<ITastingPackageService, TastingPackageService>();
     builder.Services.AddScoped<IBackGroundEmailSender, BackGroundEmailSender>();
-   // builder.Services.AddHostedService<ConsumeScopedHostedService>();
+    //?? ????????? ?? ????? ?????? ?? ????????
+    builder.Services.AddHostedService<ConsumeScopedHostedService>();
 
 
     builder.Services.Configure<StripeSettings>(

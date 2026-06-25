@@ -91,6 +91,14 @@ namespace WineShop.Services.Implementation
            
         }
 
+        public Order GetLatestOrderByUserId(string userId)
+        {
+            return GetAllOrders()
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefault();
+        }
+
 
     }
 }

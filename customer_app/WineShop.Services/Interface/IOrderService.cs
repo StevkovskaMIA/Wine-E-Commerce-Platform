@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WineShop.Domain.DomainModels;
-    
+
 namespace WineShop.Services.Interface
 {
     public interface IOrderService
@@ -16,5 +16,7 @@ namespace WineShop.Services.Interface
                             string? address = null,
                             string? city = null,
                             string? phone = null);
+        Order GetLatestOrderByUserId(string userId);
+
     }
 }

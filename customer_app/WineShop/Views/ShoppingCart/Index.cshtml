@@ -156,8 +156,12 @@
                             <label for="deliveryPhone" class="form-label small fw-semibold mb-1">
                                 <i class="fa-solid fa-phone me-1 text-muted"></i>Мобилен телефон
                             </label>
-                            <input type="tel" id="deliveryPhone" class="form-control form-control-sm"
-                                   placeholder="+389 7X XXX XXX" maxlength="20" />
+                            <input type="tel"
+                                   id="deliveryPhone"
+                                   class="form-control form-control-sm"
+                                   placeholder="+389 7X XXX XXX или 07X XXX XXX"
+                                   maxlength="20"
+                                   pattern="^(\+389\s?7\d\s?\d{3}\s?\d{3}|07\d\s?\d{3}\s?\d{3})$" />
                         </div>
 
                         <!-- Адреса и град - само при достава -->
@@ -181,7 +185,7 @@
 
                         <div id="delivery-validation-msg" class="text-danger small mt-2" style="display:none;">
                             <i class="fa-solid fa-circle-exclamation me-1"></i>
-                            Внеси мобилен телефон, а за достава и адреса со град.
+                            Внеси валиден телефон: +389 7X XXX XXX или 07X XXX XXX. За достава внеси и адреса со град.
                         </div>
 
                         <hr class="my-3" />
@@ -423,6 +427,7 @@
 </style>
 
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script>
     (function () {
         const optPickup = document.getElementById('opt-pickup');
@@ -437,16 +442,25 @@
         const modalEl = document.getElementById('confirmOrderModal');
         const summaryEl = document.getElementById('modal-order-summary');
 
+        const phoneRegex = /^(\+389\s?7\d\s?\d{3}\s?\d{3}|07\d\s?\d{3}\s?\d{3})$/;
+
         function toggleDeliveryFields() {
             const show = optDelivery && optDelivery.checked;
-            if (deliveryFields) deliveryFields.style.display = show ? 'block' : 'none';
+
+            if (deliveryFields) {
+                deliveryFields.style.display = show ? 'block' : 'none';
+            }
 
             if (!show) {
                 addrInput?.classList.remove('is-invalid');
                 cityInput?.classList.remove('is-invalid');
             }
 
-            validationMsg?.style && (validationMsg.style.display = 'none');
+            phoneInput?.classList.remove('is-invalid');
+
+            if (validationMsg) {
+                validationMsg.style.display = 'none';
+            }
         }
 
         if (optPickup) optPickup.addEventListener('change', toggleDeliveryFields);
@@ -463,7 +477,7 @@
 
                 let hasError = false;
 
-                if (!phone) {
+                if (!phoneRegex.test(phone)) {
                     hasError = true;
                     phoneInput?.classList.add('is-invalid');
                 } else {
