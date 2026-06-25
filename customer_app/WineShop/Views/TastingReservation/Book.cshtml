@@ -13,21 +13,21 @@
                     <p class="text-muted">@Model.PackageDescription</p>
 
                     <div class="mb-4">
-                        <p class="mb-1"><strong>Duration:</strong> @Model.DurationHours hours</p>
-                        <p class="mb-1"><strong>Max guests:</strong> @Model.MaxGuests</p>
-                        <p class="mb-0"><strong>Price:</strong> @Model.Price MKD</p>
+                        <p class="mb-1"><strong>Времетраење:</strong> @Model.DurationHours часа</p>
+                        <p class="mb-1"><strong>Макс. гости:</strong> @Model.MaxGuests</p>
+                        <p class="mb-0"><strong>Цена:</strong> @Model.Price денари</p>
                     </div>
 
                     @if (Model.BlocksWholeDay)
                     {
                         <div class="alert alert-warning">
-                            This package reserves the whole day. Only date selection is needed.
+                            Овој пакет важи за цел ден. Потребно е да се избере само датум.
                         </div>
                     }
                     else
                     {
                         <div class="alert alert-info">
-                            Classic tasting is reserved based on available time slots.
+                            Класичната дегустација се резервира според достапните термини.
                         </div>
                     }
 
@@ -45,7 +45,7 @@
                         <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                         <div class="mb-3">
-                            <label asp-for="Date" class="form-label">Date</label>
+                            <label asp-for="Date" class="form-label">Датум</label>
                             <input asp-for="Date" class="form-control" type="date" id="reservationDate" />
                             <span asp-validation-for="Date" class="text-danger"></span>
                         </div>
@@ -66,31 +66,31 @@
                         }
 
                         <div class="mb-3">
-                            <label asp-for="NumberOfGuests" class="form-label">Number of Guests</label>
+                            <label asp-for="NumberOfGuests" class="form-label">Број на гости</label>
                             <input asp-for="NumberOfGuests" class="form-control" type="number" min="1" max="@Model.MaxGuests" />
                             <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="FullName" class="form-label">Full Name</label>
+                            <label asp-for="FullName" class="form-label">Име и презиме</label>
                             <input asp-for="FullName" class="form-control" />
                             <span asp-validation-for="FullName" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email</label>
+                            <label asp-for="Email" class="form-label">Е-маил</label>
                             <input asp-for="Email" class="form-control" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
 
                         <div class="mb-4">
-                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
-                            <input asp-for="PhoneNumber" class="form-control" />
+                            <label asp-for="PhoneNumber" class="form-label">Телефонски број</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="07XXXXXXXX или +3897XXXXXXX" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
 
                         <button type="submit" class="btn btn-dark rounded-pill px-4">
-                            Reserve Now
+                            Резервирај
                         </button>
                     </form>
                 </div>

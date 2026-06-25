@@ -177,11 +177,6 @@ namespace WineShop.Controllers
             return Json(new { id = session.Id });
         }
 
-        /*public IActionResult SuccessPayment()
-        {
-                 
-             return View();
-        }*/
 
         public async Task<IActionResult> SuccessPayment()
         {

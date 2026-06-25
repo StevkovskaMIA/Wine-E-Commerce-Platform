@@ -241,7 +241,7 @@ namespace WineShop.Service.Implementation
             var adminMessage = new EmailMessage
             {
                 Id = Guid.NewGuid(),
-                MailTo = "contact@winerykuvin.com",
+                MailTo = "mia.stevkovska@yahoo.com",
                 Subject = "Откажана резервација за дегустација",
                 Content = $"Резервацијата на {reservation.FullName} за {reservation.ReservationStart:dd.MM.yyyy HH:mm} е откажана.",
                 status = false
